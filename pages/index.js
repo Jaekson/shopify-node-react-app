@@ -1,11 +1,30 @@
-import { TextStyle, Page, Layout } from "@shopify/polaris";
+import { TextStyle, Page, Layout, EmptyState } from "@shopify/polaris";
 
-const Index = () => (
+const img = "https://cdn.shopify.com/s/files/1/0757/9955/files/empty-state.svg";
+
+const IndexComp = () => (
   <Page>
     <Layout>
       <TextStyle variation="positive">
         Sample app using React and Next.js
       </TextStyle>
+    </Layout>
+  </Page>
+);
+
+const Index = () => (
+  <Page>
+    <Layout>
+      <EmptyState
+        heading="Discount your products temporarily"
+        action={{
+          content: "Select products",
+          onAction: () => console.log("clicked"),
+        }}
+        image={img}
+      >
+        <p>Select products to change their price temporarily.</p>
+      </EmptyState>
     </Layout>
   </Page>
 );
