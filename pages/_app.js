@@ -23,19 +23,29 @@ import "@shopify/polaris/dist/styles.css";
  * the core Shopify product and consume them through the i18n prop.
  */
 import translations from "@shopify/polaris/locales/en.json";
+import { Provider } from "@shopify/app-bridge-react";
+import Cookies from "js-cookie";
 
 class MyApp extends App {
   render() {
+    const { SHOPIFY_API_KEY } = process.env;
     const { Component, pageProps } = this.props;
+    const config = {
+      apiKey: API_KEY,
+      shopOrigin: Cookies.get("shopOrigin"),
+      forceRedirect: true,
+    };
     return (
       <React.Fragment>
         <Head>
           <title>Sample App</title>
           <meta charSet="utf-8" />
         </Head>
-        <AppProvider i18n={translations}>
-          <Component {...pageProps} />
-        </AppProvider>
+        <Provider config={config}>
+          <AppProvider i18n={translations}>
+            <Component {...pageProps} />
+          </AppProvider>
+        </Provider>
       </React.Fragment>
     );
   }
