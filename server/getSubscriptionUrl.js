@@ -36,7 +36,7 @@ const getSubscriptionUrl = async (ctx, accessToken, shop) => {
   });
 
   const response = await fetch(
-    `https://${shop}/admin/api/2019-10/graphql.json`,
+    `https://${shop}/admin/api/2020-04/graphql.json`,
     {
       method: "POST",
       headers: {

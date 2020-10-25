@@ -1,12 +1,12 @@
 require("isomorphic-fetch");
 const dotenv = require("dotenv");
-const Koa = require("koa");
 const next = require("next");
+const Koa = require("koa");
+const session = require("koa-session");
 const {
   default: createShopifyAuth,
   verifyRequest,
 } = require("@shopify/koa-shopify-auth");
-const session = require("koa-session");
 const {
   default: graphQLProxy,
   ApiVersion,
@@ -38,6 +38,8 @@ app.prepare().then(() => {
       secret: SHOPIFY_API_SECRET_KEY,
       scopes: ["read_products", "write_products"],
       async afterAuth(ctx) {
+        console.log("[afterAuth] ctx", ctx);
+        // shop is the name of store e.g. store_name.myshopify.com
         const { shop, accessToken } = ctx.session;
         ctx.cookies.set("shopOrigin", shop, {
           httpOnly: false,
@@ -55,7 +57,10 @@ app.prepare().then(() => {
         });
 
         if (registration.success) {
-          console.log("Successfully registered webhook!");
+          console.log(
+            "[afterAuth] Successfully registered webhook! ",
+            registration
+          );
         } else {
           console.log("Failed to register webhook", registration.result);
         }
