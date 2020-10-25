@@ -8,12 +8,11 @@ import {
   Thumbnail,
 } from "@shopify/polaris";
 import store from "store-js";
+import { Redirect } from "@shopify/app-bridge/actions";
+import { Context } from "@shopify/app-bridge-react";
 
-/**
- * variants are instances of the same product based on its available options.
- * For example, a sweatshirt could come in a variety of colors and sizes.
- * Each combination of color and size would be considered a variant of the product
- */
+import * as PropTypes from "prop-types";
+
 const GET_PRODUCTS_BY_ID = gql`
   query getProducts($ids: [ID!]!) {
     nodes(ids: $ids) {
@@ -43,65 +42,84 @@ const GET_PRODUCTS_BY_ID = gql`
   }
 `;
 
-function ResourceListWithProducts() {
-  console.log("ids ", store.get("ids"));
-  const twoWeeksFromNow = new Date(Date.now() + 12096e5).toDateString();
-  return (
-    <Query query={GET_PRODUCTS_BY_ID} variables={{ ids: store.get("ids") }}>
-      {({ data, loading, error }) => {
-        if (loading) return <div>Loading…</div>;
-        if (error) return <div>{error.message}</div>;
-        console.log(data);
-        return (
-          <Card>
-            <ResourceList
-              showHeader
-              resourceName={{ singular: "Product", plural: "Products" }}
-              items={data.nodes}
-              renderItem={(item) => {
-                const media = (
-                  <Thumbnail
-                    source={
-                      item.images.edges[0]
-                        ? item.images.edges[0].node.originalSrc
-                        : ""
-                    }
-                    alt={
-                      item.images.edges[0]
-                        ? item.images.edges[0].node.altText
-                        : ""
-                    }
-                  />
-                );
-                const price = item.variants.edges[0].node.price;
-                return (
-                  <ResourceList.Item
-                    id={item.id}
-                    media={media}
-                    accessibilityLabel={`View details for ${item.title}`}
-                  >
-                    <Stack>
-                      <Stack.Item fill>
-                        <h3>
-                          <TextStyle variation="strong">{item.title}</TextStyle>
-                        </h3>
-                      </Stack.Item>
-                      <Stack.Item>
-                        <p>${price}</p>
-                      </Stack.Item>
-                      <Stack.Item>
-                        <p>Expires on {twoWeeksFromNow} </p>
-                      </Stack.Item>
-                    </Stack>
-                  </ResourceList.Item>
-                );
-              }}
-            />
-          </Card>
-        );
-      }}
-    </Query>
-  );
+class ResourceListWithProducts extends React.Component {
+  static contextType = Context;
+
+  render() {
+    const app = this.context;
+    const redirectToProduct = () => {
+      const redirect = Redirect.create(app);
+      redirect.dispatch(Redirect.Action.APP, "/edit-products");
+    };
+
+    const twoWeeksFromNow = new Date(Date.now() + 12096e5).toDateString();
+    return (
+      <Query query={GET_PRODUCTS_BY_ID} variables={{ ids: store.get("ids") }}>
+        {({ data, loading, error }) => {
+          if (loading) {
+            return <div>Loading…</div>;
+          }
+          if (error) {
+            return <div>{error.message}</div>;
+          }
+          console.log(data);
+          return (
+            <Card>
+              <ResourceList
+                showHeader
+                resourceName={{ singular: "Product", plural: "Products" }}
+                items={data.nodes}
+                renderItem={(item) => {
+                  const media = (
+                    <Thumbnail
+                      source={
+                        item.images.edges[0]
+                          ? item.images.edges[0].node.originalSrc
+                          : ""
+                      }
+                      alt={
+                        item.images.edges[0]
+                          ? item.images.edges[0].node.altText
+                          : ""
+                      }
+                    />
+                  );
+                  const price = item.variants.edges[0].node.price;
+                  return (
+                    <ResourceList.Item
+                      id={item.id}
+                      media={media}
+                      accessibilityLabel={`View details for ${item.title}`}
+                      onClick={() => {
+                        store.set("item", item);
+                        redirectToProduct();
+                      }}
+                    >
+                      <Stack>
+                        <Stack.Item fill>
+                          <h3>
+                            <TextStyle variation="strong">
+                              {item.title}
+                            </TextStyle>
+                          </h3>
+                        </Stack.Item>
+                        <Stack.Item>
+                          <p>${price}</p>
+                        </Stack.Item>
+                        <Stack.Item>
+                          <p>Expires on {twoWeeksFromNow} </p>
+                        </Stack.Item>
+                      </Stack>
+                    </ResourceList.Item>
+                  );
+                }}
+              />
+            </Card>
+          );
+        }}
+      </Query>
+    );
+  }
 }
 
 export default ResourceListWithProducts;
