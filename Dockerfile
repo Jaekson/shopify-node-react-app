@@ -28,3 +28,6 @@ CMD ["yarn", "dev"]
 # -p 3002:3001 map the port 3001 that is running in docker to the host's port 3002
 # --name is not necessary
 # docker run -d -p 3002:3001 --name docker-shopify-container docker-shopify-image
+
+# Enter the container
+# $ docker exec -it <container id> /bin/bash
